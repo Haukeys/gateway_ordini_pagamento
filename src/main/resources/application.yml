@@ -1,0 +1,23 @@
+server:
+  port: 8080 # Le port unique et public de votre Gateway
+
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      routes:
+
+        # ROUTE POUR LE SERVICE ORDINI (Commandes)
+        - id: ordine_route
+          uri: http://gestione-ordini:8080 # Nom du conteneur Docker + son port interne 8080
+          predicates:
+            # On accepte le chemin exact ET les sous-chemins
+            - Path=/api/ordini, /api/ordini/**
+
+        # ROUTE POUR LE SERVICE PAGAMENTO (Paiement)
+        - id: pagamento_route
+          uri: http://gestione-pagamento:8080 # Nom du conteneur Docker + son port interne 8080
+          predicates:
+            # On accepte le chemin exact ET les sous-chemins
+            - Path=/api/pagamenti, /api/pagamenti/**
