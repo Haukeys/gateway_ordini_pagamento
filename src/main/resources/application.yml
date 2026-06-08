@@ -1,5 +1,5 @@
 server:
-  port: 8080 # Le port unique et public de votre Gateway
+  port: ${GATEWAY_PORT} # Le port unique et public de votre Gateway
 
 spring:
   application:
@@ -10,14 +10,14 @@ spring:
 
         # ROUTE POUR LE SERVICE ORDINI (Commandes)
         - id: ordine_route
-          uri: http://gestione-ordini:8080 # Nom du conteneur Docker + son port interne 8080
+          uri: http://${GESTIONE_ORDINI_HOST}:${GESTIONE_ORDINI_PORT} # Nom du conteneur Docker + son port interne 8080
           predicates:
             # On accepte le chemin exact ET les sous-chemins
-            - Path=/api/ordini, /api/ordini/**
+            - Path=/${PATH_ORDINI}/**
 
         # ROUTE POUR LE SERVICE PAGAMENTO (Paiement)
         - id: pagamento_route
-          uri: http://gestione-pagamento:8080 # Nom du conteneur Docker + son port interne 8080
+          uri: http://${GESTIONE_PAGAMENTO_HOST}:${GESTIONE_PAGAMENTO_PORT} # Nom du conteneur Docker + son port interne 8080
           predicates:
             # On accepte le chemin exact ET les sous-chemins
-            - Path=/api/pagamenti, /api/pagamenti/**
+            - Path=/${PATH_PAGAMENTO}/**
