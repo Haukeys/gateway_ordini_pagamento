@@ -7,17 +7,29 @@ spring:
   cloud:
     gateway:
       routes:
+        - id: gestione-auth
+        # Redirige vers http://gestione-auth:8080
+          uri: http://${GESTIONE_AUTH_HOST}:${GESTIONE_AUTH_PORT}
+          predicates:
+            # Capture toutes les requêtes arrivant sur /api/auth/**
+            - Path=/${PATH_AUTH}/**
+
 
         # ROUTE POUR LE SERVICE ORDINI (Commandes)
         - id: ordine_route
-          uri: http://${GESTIONE_ORDINI_HOST}:${GESTIONE_ORDINI_PORT} # Nom du conteneur Docker + son port interne 8080
+          uri: http://${GESTIONE_ORDINI_HOST}:${GESTIONE_ORDINI_PORT}
           predicates:
-            # On accepte le chemin exact ET les sous-chemins
-            - Path=/${PATH_ORDINI}/**
+            - Path=/${PATH_ORDINI},/${PATH_ORDINI}/**
+          filters:
+            - AuthenticationFilter
 
         # ROUTE POUR LE SERVICE PAGAMENTO (Paiement)
         - id: pagamento_route
-          uri: http://${GESTIONE_PAGAMENTO_HOST}:${GESTIONE_PAGAMENTO_PORT} # Nom du conteneur Docker + son port interne 8080
+          uri: http://${GESTIONE_PAGAMENTO_HOST}:${GESTIONE_PAGAMENTO_PORT}
           predicates:
-            # On accepte le chemin exact ET les sous-chemins
-            - Path=/${PATH_PAGAMENTO}/**
+            - Path=/${PATH_PAGAMENTO},/${PATH_PAGAMENTO}/**
+          filters:
+            - AuthenticationFilter
+security:
+  jwt:
+    secret-key: ${JWT_SECRET_KEY}
