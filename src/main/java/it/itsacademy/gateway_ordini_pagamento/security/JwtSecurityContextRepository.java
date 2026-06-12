@@ -17,6 +17,8 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.security.Key;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Chargé par Spring WebFlux Security AVANT la vérification des autorizations.
@@ -54,14 +56,24 @@ public class JwtSecurityContextRepository implements ServerSecurityContextReposi
                     .parseClaimsJws(token)
                     .getBody();
 
-            String username = claims.getSubject();
+            String username = claims.getSubject();// morceau qui contien username de l'user
             String rolesString = claims.get("roles", String.class); // ex: "ROLE_USER"
+            String userId = claims.get("userId", String.class);// ajout du morceau qui contient l id de l'user
 
+            Map<String, Object> details = new HashMap<>();//[point de rencontre entre les commentaire authF-securityContext]
+            // cette partie est en relation avec la partie  qui a etait ajouter dans
+            // la partie authenticationFilter
+            details.put("userId", userId);//Ici tu mets : exemple:"userId" -> "123e4567-e89b-12d3-a456-426614174000"
+            //dans details, Ensuite dans AuthenticationFilter, pour récupérer cette valeur, il faut faire :
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                     username,
                     null,
                     AuthorityUtils.commaSeparatedStringToAuthorityList(rolesString)
             );
+            ((UsernamePasswordAuthenticationToken) authentication).setDetails(details);//En gros cette partie signifie
+            //Attache ces informations supplémentaires à l'utilisateur authentifié afin qu'elles
+            // soient récupérables plus tard via authentication.getDetails()
+
 
             return Mono.just(new SecurityContextImpl(authentication));
 
