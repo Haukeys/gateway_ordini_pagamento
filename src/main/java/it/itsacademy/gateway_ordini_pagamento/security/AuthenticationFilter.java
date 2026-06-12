@@ -9,6 +9,7 @@ import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -40,15 +41,28 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
     }
 
     private ServerHttpRequest buildMutatedRequest(ServerHttpRequest request, Authentication authentication) {
+
         String username = authentication.getName(); // le subject du JWT
 
         String roles = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
+        //[point de rencontre entre les commentaire authF-securityContext] sert uniquement à faire disparaître un avertissement du compilateur
+        //il ne peut pas vérifier à la compilation que l'objet est réellement une Map<String,Object>
+        //sans le waring,Le code fonctionne exactement pareil,
+        //on aura juste un avertissement dans IntelliJ
+        //Unchecked cast
+        @SuppressWarnings("unchecked")
+        Map<String, Object> details =
+                (Map<String, Object>)
+                        authentication.getDetails();
+
+        String userId = details.get("userId").toString();//la string qu'on a ici doit rester la meme sur tout le projet.
 
         return request.mutate()
-                .header("X-User-Id", username)
-                .header("X-User-Roles", roles)
+                .header("X-User-Id", userId)//envoi userid
+                .header("X-User-Name", username)//envoi username  , changement  de la string car le nom etait
+                .header("X-User-Roles", roles)//envoi role
                 .build();
     }
 }
