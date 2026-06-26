@@ -39,7 +39,8 @@ public class SecurityConfig {
 
                         // Seul ROLE_USER peut accéder aux pagamenti
                         .pathMatchers("/api/pagamenti/**").hasAuthority("ROLE_USER")
-
+                        // Seul ROLE_USER peut accéder aux ricevute (À placer AVANT la règle générique)
+                        .pathMatchers("/api/pagamenti/ricevute/**").hasAuthority("ROLE_USER")
                         // Tout le reste nécessite d'être connecté
                         .anyExchange().authenticated()
                 );
